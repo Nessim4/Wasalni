@@ -1,0 +1,310 @@
+.container {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100vh;
+    background-color: #fff;
+    margin-left:10%;
+  }
+.button-wrapper{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap:10px;
+    width: 100%;
+  }
+  .form {
+    text-align: center;
+    width: 500px;
+  }
+  
+  .title {
+    text-align: left;
+    font-family:"League Spartan";
+    font-size: 35pt;
+    font-weight: bold;
+    margin-bottom: 50px;
+  }
+  
+  .input-wrapper {
+    margin-bottom: 15px;
+  }
+  
+  .input {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    padding: 10px;
+  }
+  .location_icon{
+    height:16px;
+    width:16px;
+  }
+  .text-input {
+    border: none;
+    outline: none;
+    width: 100%;
+    background: transparent;
+    font-size: 16px;
+  }
+  
+  .icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .date-time {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .date,
+  .time,.passengers {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .button {
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+    width: 100%;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  .map{
+    margin-right:10%;
+  }
+  iframe {
+    width: 500px;
+    height: 500px; 
+    border: 5px solid #000;
+    border-radius: 20px;
+  }
+  .container-about{
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100vh;
+    background-color: #fff;
+    margin-left:10%;
+  }
+.aboutimg{
+    margin-top:0;
+    width:500px;
+    height:500px;
+    border-radius: 20px;
+    
+}
+.about{
+    text-align: center;
+    width: 500px;
+    margin-right: 10%;
+}
+.about h2{
+    text-align: center;
+    font-family:"League Spartan";
+    font-size: 35pt;
+    font-weight: bold;
+    margin-bottom: 50px;
+}
+.about p{
+    text-align: center;
+    font-size: 16pt;
+    font-weight: bold;
+}
+.button-about{
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+.container-mission{
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100vh;
+    background-color: #fff;
+    margin-left:10%;
+    margin-right:5%;
+  }
+.missionimg{
+    margin-top:0;
+    width:750px;
+    height:500px;
+   
+    border-radius: 20px;
+}
+.mission{
+    text-align: center;
+    width: 500px;
+    margin-right: 10%;
+}
+.mission h1{
+    text-align: center;
+    font-family:"League Spartan";
+    font-size: 35pt;
+    font-weight: bold;
+    margin-bottom: 50px;
+}
+.mission p{
+    text-align: center;
+    font-size: 16pt;
+    font-weight: bold;
+}
+.calendar-button {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    border: none;
+    background-color: transparent;
+  }
+  
+  .calendar-input {
+    margin-top: 10px;
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 4px;
+  }
+  .time-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .time-option {
+    padding: 8px 12px;
+    background-color: #f3f3f3;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+  }
+  
+  .time-option.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+  
+  .time-option:hover {
+    background-color: #007bff;
+    color: white;
+  }
+  /* Modale Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .date-time {
+    position: relative;
+  }
+  
+  .date, .time {
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .date-picker-modal, .time-picker-modal,.passenger-picker-modal {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: auto;
+    background-color: white;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 5px;
+    z-index: 10;
+  }
+  
+  .time-picker-modal ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .time-picker-modal li {
+    padding: 8px;
+    cursor: pointer;
+  }
+  
+  .time-picker-modal li:hover {
+    background-color: #f0f0f0;
+  }
+  .passenger-picker-modal ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .passenger-picker-modal li {
+    padding: 8px;
+    cursor: pointer;
+  }
+  
+  .passenger-picker-modal li:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .custom-calendar {
+    width: 200px;
+  }
+  .passengers {
+    position: relative;
+}
+.container-securite{
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100vh;
+    background-color: #fff;
+    margin-left:5%;
+    margin-right:5%;
+  }
+  .securiteimg{
+    margin-top:0;
+    width:800px;
+    height:500px;
+   
+    border-radius: 20px;
+}
+.securite h1{
+    text-align: center;
+    font-family:"League Spartan";
+    font-size: 35pt;
+    font-weight: bold;
+    margin-bottom: 50px;
+}
+.securite p{
+    text-align: center;
+    font-size: 16pt;
+    font-weight: bold;
+}
