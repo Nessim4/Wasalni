@@ -3,20 +3,22 @@ import Wasalnilogo from './assets/images/Wasalnilogo.png';
 import React, { useState } from 'react';
 import LoginModal from './LoginModal.jsx';
 import SignupModal from './SignupModal.jsx';
+import Main from './Main.jsx';
 
 function Header() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null);
 
   const handleLoginClick = () => {
     setShowLoginModal(true);
-    setShowSignupModal(false); // Close the signup modal when opening the login modal
+    setShowSignupModal(false);
   };
 
   const handleSignupClick = () => {
     setShowSignupModal(true);
-    setShowLoginModal(false); // Close the login modal when opening the signup modal
+    setShowLoginModal(false);
   };
 
   const handleCloseLoginModal = (user) => {
@@ -28,6 +30,20 @@ function Header() {
 
   const handleCloseSignupModal = () => {
     setShowSignupModal(false);
+  };
+
+  const handleUserMenuClick = () => {
+    setShowUserMenu(!showUserMenu);
+  };
+
+  const handleLogout = async () => {
+    await fetch('http://localhost:8081/users/logout', {
+      method: 'POST',
+      credentials: 'include',
+    });
+
+    setLoggedInUser(null);
+    setShowUserMenu(false);
   };
 
   return (
@@ -45,7 +61,15 @@ function Header() {
         </nav>
         <div className="user-actions">
           {loggedInUser ? (
-            <button className="login-user">{loggedInUser.name}</button>
+            <div className="user-menu">
+              <button className="login-user" onClick={handleUserMenuClick}>{loggedInUser.name}</button>
+              {showUserMenu && (
+                <ul className="user-menu-list">
+                  <li>{loggedInUser.email}</li>
+                  <li><p className="logout" onClick={handleLogout}>Déconnecter</p></li>
+                </ul>
+              )}
+            </div>
           ) : (
             <>
               <button className="login" onClick={handleLoginClick}>Se connecter</button>
@@ -56,6 +80,7 @@ function Header() {
       </header>
       <LoginModal show={showLoginModal} onClose={handleCloseLoginModal} onSignupClick={handleSignupClick} />
       <SignupModal show={showSignupModal} onClose={handleCloseSignupModal} onLoginClick={handleLoginClick} />
+      <Main loggedInUser={loggedInUser} setShowLoginModal={setShowLoginModal} />
     </>
   );
 }

@@ -33,7 +33,7 @@ function SignupModal({ show, onClose, onLoginClick }) {
       console.log("Response data:", responseData);
 
       if (response.ok) {
-        alert("User registered successfully");
+        alert("User registered successfully Now login ");
         onClose();
       } else {
         alert(`Failed to register user: ${responseData.message || 'Unknown error'}`);

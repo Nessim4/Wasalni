@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import axios from "axios";
 import DatePicker from "react-datepicker";
@@ -15,7 +14,30 @@ import securite from "./assets/images/securite.jpg";
 
 import "./Main.css";
 
-function Main() {
+const defaultPosition = [36.8065, 10.1815];
+
+const fetchSuggestions = async (query, setSuggestions) => {
+  if (!query) {
+    setSuggestions([]);
+    return;
+  }
+
+  try {
+    const response = await axios.get("https://nominatim.openstreetmap.org/search", {
+      params: {
+        q: query,
+        format: "json",
+        addressdetails: 1,
+        limit: 5,
+      },
+    });
+    setSuggestions(response.data);
+  } catch (error) {
+    console.error("Error fetching location suggestions:", error);
+  }
+};
+
+function Main({ loggedInUser, setShowLoginModal }) {
   const [selectedDate, setSelectedDate] = useState(null);
   const [formattedDate, setFormattedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -28,30 +50,28 @@ function Main() {
   const [endPoint, setEndPoint] = useState("");
   const [endSuggestions, setEndSuggestions] = useState([]);
   const [activeInput, setActiveInput] = useState(null);
-
+  const [mapCenter, setMapCenter] = useState(defaultPosition);
+  const [markerPosition, setMarkerPosition] = useState(defaultPosition);
+  const [showAnnouncements, setShowAnnouncements] = useState(false);
+  const [announcements, setAnnouncements] = useState([]);
   const hours = [
     "6:00 AM", "7:00 AM", "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM"
   ];
-  const defaultPosition = [36.8065, 10.1815];
-  const fetchSuggestions = async (query, setSuggestions) => {
-    if (!query) {
-      setSuggestions([]);
-      return;
-    }
 
-    try {
-      const response = await axios.get("https://nominatim.openstreetmap.org/search", {
-        params: {
-          q: query,
-          format: "json",
-          addressdetails: 1,
-          limit: 5,
-        },
-      });
-      setSuggestions(response.data);
-    } catch (error) {
-      console.error("Error fetching location suggestions:", error);
+  useEffect(() => {
+    if (!loggedInUser) {
+      setShowAnnouncements(false);
     }
+  }, [loggedInUser]);
+
+  const handleEndPointSelect = (location) => {
+    setEndPoint(location.display_name);
+    setEndSuggestions([]);
+    setActiveInput(null);
+    const { lat, lon } = location;
+    const newCenter = [lat, lon];
+    setMapCenter(newCenter);
+    setMarkerPosition(newCenter);
   };
 
   const reverseGeocode = async (latitude, longitude) => {
@@ -64,8 +84,7 @@ function Main() {
           addressdetails: 1,
         },
       });
-      // Use the formatted address from the response
-      setStartPoint(response.data.display_name);  // Set the startPoint with the address
+      setStartPoint(response.data.display_name);
     } catch (error) {
       console.error("Error reverse geocoding location:", error);
     }
@@ -76,7 +95,7 @@ function Main() {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          reverseGeocode(latitude, longitude);  // Reverse geocode to get the location name
+          reverseGeocode(latitude, longitude);
         },
         (error) => {
           console.error("Error getting user location:", error);
@@ -87,10 +106,47 @@ function Main() {
     }
   }
 
+  const fetchAnnouncements = async () => {
+    try {
+      const response = await axios.get("http://localhost:8081/announcements");
+      setAnnouncements(response.data);
+      setShowAnnouncements(true);
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
+    }
+  };
+
+  const handleSearchClick = () => {
+    if (!loggedInUser) {
+      setShowLoginModal(true);
+    } else {
+      fetchAnnouncements();
+    }
+  };
+
+  const handlePublishClick = async () => {
+    if (!loggedInUser) {
+      setShowLoginModal(true);
+    } else {
+      const newAnnouncement = {
+        startPoint,
+        endPoint,
+        selectedDate,
+        selectedTime,
+        selectedPassengers
+      };
+      try {
+        await axios.post("http://localhost:8081/announcements", newAnnouncement);
+        fetchAnnouncements();
+      } catch (error) {
+        console.error("Error publishing announcement:", error);
+      }
+    }
+  };
+
   return (
     <div>
       <div className="container">
-        {/* Form Section */}
         <div className="form">
           <h1 className="title">Conduisez moins, vivez plus ensemble</h1>
 
@@ -111,7 +167,7 @@ function Main() {
                 className="location_icon"
                 src={location}
                 alt="Location Icon"
-                onClick={getUserLocation}  // Only trigger location determination for startPoint
+                onClick={getUserLocation}
               />
             </div>
             {activeInput === "start" && startSuggestions.length > 0 && (
@@ -168,30 +224,27 @@ function Main() {
               </div>
             )}
           </div>
-          {/* Date-Time Section */}
+
           <div className="date-time">
-  {/* Date Button */}
-  <div className="date" onClick={() => setShowDateModal(!showDateModal)}>
-    
-    {formattedDate || "Date"}
-    {showDateModal && (
-      <div className="date-picker-modal">
-        <DatePicker
-          selected={selectedDate}
-          onChange={(date) => { 
-            setSelectedDate(date);  // Update the selected date
-            setFormattedDate(date.toLocaleDateString()); // Update the formatted date
-            setShowDateModal(false); // Close the date picker after selection
-          }}
-          inline
-          className="custom-calendar"
-        />
-      </div>
-    )}
-    <img className='icon' src={calendar}></img>
+            <div className="date" onClick={() => setShowDateModal(!showDateModal)}>
+              {formattedDate || "Date"}
+              {showDateModal && (
+                <div className="date-picker-modal">
+                  <DatePicker
+                    selected={selectedDate}
+                    onChange={(date) => {
+                      setSelectedDate(date);
+                      setFormattedDate(date.toLocaleDateString());
+                      setShowDateModal(false);
+                    }}
+                    inline
+                    className="custom-calendar"
+                  />
+                </div>
+              )}
+              <img className='icon' src={calendar}></img>
             </div>
 
-            {/* Time Button */}
             <div className="time" onClick={() => setShowTimeModal(!showTimeModal)}>
               {selectedTime || "Heure "}
               {showTimeModal && (
@@ -207,8 +260,8 @@ function Main() {
               )}
               <img className="icon" src={time}></img>
             </div>
-          <div className="passengers" onClick={() => setShowPassengerModal(!showPassengerModal)}>
-              
+
+            <div className="passengers" onClick={() => setShowPassengerModal(!showPassengerModal)}>
               {selectedPassengers || "Nombre de passagers"}
               {showPassengerModal && (
                 <div className="passenger-picker-modal">
@@ -221,36 +274,53 @@ function Main() {
                   </ul>
                 </div>
               )}
-               <img className="icon" src={passengerIcon} alt="Passenger Icon" />
-              </div>
-             
+              <img className="icon" src={passengerIcon} alt="Passenger Icon" />
             </div>
-            <div className="button-wrapper">
-          <button className="button">Rechercher un Covoiturage</button>
-          <button className="button">Publier une Annonce</button>
+          </div>
+
+          <div className="button-wrapper">
+            <button className="button" onClick={handleSearchClick}>Rechercher un Covoiturage</button>
+            <button className="button" onClick={handlePublishClick}>Publier une Annonce</button>
           </div>
         </div>
 
-        {/* Map Section */}
-        <div className="map" style={{ width: "500px", height: "500px",borderRadius: "20px" }}>
+        <div className="map" style={{ width: "500px", height: "500px", borderRadius: "20px" }}>
           <MapContainer
-            center={defaultPosition}
-            zoom={1}
-            style={{ width: "100%", height: "100%",borderRadius: "20px" }}
+            center={mapCenter}
+            zoom={13}
+            style={{ width: "100%", height: "100%", borderRadius: "20px" }}
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
-            {/* Example of adding a marker */}
-            <Marker position={defaultPosition}>
-              <Popup>A popup on the map</Popup>
+            <Marker position={markerPosition}>
+              <Popup>{endPoint}</Popup>
             </Marker>
           </MapContainer>
         </div>
       </div>
 
-      {/* About Section */}
+      {showAnnouncements && (
+        <>
+          <div className="announcements-title">
+            <h2 className="announcements">Annonces</h2>
+          </div>
+
+          <div className="announcements-container">
+            {announcements.map((announcement, index) => (
+              <div key={index} className="announcement-container">
+                <p>Départ: {announcement.startPoint}</p>
+                <p>Arrivée: {announcement.endPoint}</p>
+                <p>Date: {announcement.selectedDate ? new Date(announcement.selectedDate).toLocaleDateString() : ""}</p>
+                <p>Heure: {announcement.selectedTime}</p>
+                <p>Passagers: {announcement.selectedPassengers}</p>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       <div className="container-about">
         <div className="wasalni-corp">
           <img className="aboutimg" src={Wasalnicorp} alt="Wasalni Corp" />
@@ -264,7 +334,6 @@ function Main() {
         </div>
       </div>
 
-      {/* Mission Section */}
       <div className="container-mission">
         <div className="mission">
           <h1>Notre mission</h1>
@@ -278,16 +347,16 @@ function Main() {
           <img className="missionimg" src={Covoiturage} alt="Covoiturage" />
         </div>
       </div>
+
       <div className="container-securite">
-      <div className="securite-img">
-            <img className="securiteimg" src={securite} alt="Sécurité" />
-      </div>
-        <div className="securite">
-            <h1>Votre sécurité est notre priorité</h1>
-            <p>Waslani garantit des trajets sécurisés et confortables pour tous vos déplacements.</p>
+        <div className="securite-img">
+          <img className="securiteimg" src={securite} alt="Sécurité" />
         </div>
-        
-      </div> 
+        <div className="securite">
+          <h1>Votre sécurité est notre priorité</h1>
+          <p>Waslani garantit des trajets sécurisés et confortables pour tous vos déplacements.</p>
+        </div>
+      </div>
     </div>
   );
 }
